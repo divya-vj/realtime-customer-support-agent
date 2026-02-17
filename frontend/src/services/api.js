@@ -1,9 +1,9 @@
-import axios from 'axios';
+﻿import axios from 'axios';
 
-const API_BASE_URL = 'https://ai-support-backend.onrender.com/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://ai-support-backend-i04z.onrender.com';
 
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: API_BASE_URL + '/api',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -37,7 +37,6 @@ export const getAllConversations = async (status = null, limit = 50) => {
   try {
     const params = { limit };
     if (status) params.status = status;
-    
     const response = await api.get('/analytics/conversations', { params });
     return response.data;
   } catch (error) {
