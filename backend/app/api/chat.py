@@ -5,38 +5,62 @@ from app.schemas.chat import ChatMessage, ChatResponse, MessageDetail
 from app.services.chat_service import ChatService
 from app.services.sentiment import analyze_sentiment as ai_sentiment
 from typing import List
-import anthropic
-import os
+import random
 
 router = APIRouter()
 
 async def get_llm_response(message: str, history: list) -> str:
-    """Call Claude API for response"""
-    try:
-        client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
-        
-        messages = []
-        for h in history:
-            if h["role"] in ["user", "assistant"]:
-                messages.append({"role": h["role"], "content": h["content"]})
-        
-        if not messages or messages[-1]["role"] != "user":
-            messages.append({"role": "user", "content": message})
-        
-        response = client.messages.create(
-            model="claude-haiku-4-5-20251001",
-            max_tokens=500,
-            system="You are a helpful customer support agent. Be concise, empathetic, and professional. Help customers with their issues efficiently.",
-            messages=messages
-        )
-        
-        return response.content[0].text
-    except Exception as e:
-        print(f"Claude API error: {e}")
-        return "I apologize, I'm having trouble connecting. Please try again."
+    """Smart mock responses for demo"""
+    message_lower = message.lower()
+    
+    # Greeting responses
+    if any(word in message_lower for word in ['hello', 'hi', 'hey']):
+        return "Hello! I'm your AI support assistant. How can I help you today?"
+    
+    # Order-related
+    if any(word in message_lower for word in ['order', 'delivery', 'shipping', 'package']):
+        return "I'd be happy to help with your order! Could you please provide your order number so I can look into this for you?"
+    
+    # Frustrated/angry sentiment
+    if any(word in message_lower for word in ['frustrated', 'angry', 'upset', 'annoyed', 'terrible']):
+        return "I completely understand your frustration, and I sincerely apologize for the inconvenience. Let me escalate this to a senior agent who can resolve this immediately. In the meantime, can you share more details about the issue?"
+    
+    # Refund/return
+    if any(word in message_lower for word in ['refund', 'return', 'money back', 'cancel']):
+        return "I can definitely help you with that. Our return policy allows refunds within 30 days. Would you like me to start the refund process for you? I'll need your order number to proceed."
+    
+    # Account issues
+    if any(word in message_lower for word in ['account', 'login', 'password', 'sign in']):
+        return "I can help you with your account! Have you tried resetting your password? I can send you a password reset link to your registered email address."
+    
+    # Payment issues
+    if any(word in message_lower for word in ['payment', 'charge', 'credit card', 'billing']):
+        return "Let me help you resolve this payment issue. Could you clarify what specific problem you're experiencing? I can check your billing details and transaction history."
+    
+    # Product questions
+    if any(word in message_lower for word in ['product', 'item', 'quality', 'size', 'color']):
+        return "I'd be happy to provide more information about our products! Which specific item are you interested in? I can share details about features, specifications, and availability."
+    
+    # Thanks/positive
+    if any(word in message_lower for word in ['thank', 'thanks', 'appreciate', 'great', 'awesome']):
+        return "You're very welcome! I'm glad I could help. Is there anything else I can assist you with today?"
+    
+    # Help/general
+    if any(word in message_lower for word in ['help', 'support', 'assist', 'question']):
+        return "I'm here to help! I can assist with orders, returns, account issues, product information, and more. What would you like help with?"
+    
+    # Default fallback responses
+    fallbacks = [
+        "I understand your concern. Could you provide a bit more detail so I can assist you better?",
+        "Thank you for reaching out! Let me help you with that. Can you share more information about your issue?",
+        "I'm here to help resolve this for you. Could you elaborate on what you're experiencing?",
+        "I appreciate you contacting us. To better assist you, could you provide more details about your situation?"
+    ]
+    
+    return random.choice(fallbacks)
 
 async def analyze_sentiment(message: str) -> tuple:
-    """Call Person 1's AI sentiment analysis"""
+    """Call sentiment analysis"""
     result = ai_sentiment(message)
 
     mood = result["mood"]
