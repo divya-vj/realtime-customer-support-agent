@@ -1,4 +1,4 @@
-﻿# 🤖 AI Customer Support Agent
+﻿#  AI Customer Support Agent
 
 Real-time AI-powered customer support system with sentiment analysis and automatic escalation.
 
